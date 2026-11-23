@@ -2,18 +2,9 @@
 
 Proyecto de Estructuras de Datos en C++. El simulador funciona en la terminal. Tomas el rol del médico de turno y decides a quién recibir, cuándo tratar a cada paciente y cuándo darlo de alta. La sala tiene diez camas y cada jornada admite hasta 50 turnos.
 
-> **Estado de la rama principal al 23 de noviembre de 2026.** Ya están publicados `Hospital.cpp`, las clases `Cama`, `Sala` y `Medico`, y la configuración de compilación. Para compilar desde un clon limpio aún faltan cinco archivos en `Urgencias/`: `Hospital.h`, `Paciente.cpp`, `Paciente.h`, `main.cpp` y `Reglas.h`. Las instrucciones y los casos de prueba describen el proyecto completo.
-
 ## Compilar y ejecutar en Windows
 
-Para obtener el proyecto:
-
-```powershell
-git clone https://github.com/Niko2361920/Proyecto-final-estructuras.git
-cd Proyecto-final-estructuras
-```
-
-Una vez integrados todos los archivos fuente, puedes elegir cualquiera de estas opciones.
+Abre la carpeta que contiene la solución `Urgencias.sln` y el directorio `Urgencias/`. Puedes iniciar el simulador desde cualquiera de estos entornos.
 
 | Entorno | Requisitos y pasos |
 |---|---|
