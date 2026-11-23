@@ -1,0 +1,11 @@
+# Archivos de compilacion y depuracion
+/build/
+/.vs/
+/x64/
+/Debug/
+/Release/
+*.obj
+*.pdb
+*.exe
+*.ilk
+*.vcxproj.user
