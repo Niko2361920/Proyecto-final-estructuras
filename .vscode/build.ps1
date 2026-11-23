@@ -12,8 +12,8 @@ if (-not $installation) {
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $env:URGENCIAS_VC_ENV = Join-Path $installation 'VC\Auxiliary\Build\vcvars64.bat'
-$sources = Get-ChildItem -LiteralPath (Join-Path $projectRoot 'Urgencias') -Filter '*.cpp' -File
-$sourceArguments = ($sources | ForEach-Object { '"..\Urgencias\' + $_.Name + '"' }) -join ' '
+$sources = Get-ChildItem -LiteralPath $projectRoot -Filter '*.cpp' -File
+$sourceArguments = ($sources | ForEach-Object { '"..\' + $_.Name + '"' }) -join ' '
 
 Push-Location -LiteralPath $projectRoot
 try {
