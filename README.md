@@ -2,7 +2,7 @@
 
 Proyecto de Estructuras de Datos en C++. El simulador funciona en la terminal. Tomas el rol del médico de turno y decides a quién recibir, cuándo tratar a cada paciente y cuándo darlo de alta. La sala tiene diez camas y cada jornada admite hasta 50 turnos.
 
-> **Estado del repositorio.** La primera entrega contiene las clases `Cama`, `Sala` y `Medico`, además de la configuración de compilación. Para ejecutar el simulador deben integrarse `Hospital.cpp`, `Hospital.h`, `Paciente.cpp`, `Paciente.h`, `main.cpp` y `Reglas.h` en la carpeta `Urgencias/`.
+> **Estado de la rama principal al 23 de noviembre de 2026.** Ya están publicados `Hospital.cpp`, las clases `Cama`, `Sala` y `Medico`, y la configuración de compilación. Para compilar desde un clon limpio aún faltan cinco archivos en `Urgencias/`: `Hospital.h`, `Paciente.cpp`, `Paciente.h`, `main.cpp` y `Reglas.h`. Las instrucciones y los casos de prueba describen el proyecto completo.
 
 ## Compilar y ejecutar en Windows
 
@@ -45,6 +45,28 @@ El menú principal también permite consultar las jornadas de un médico (**2**)
 
 La gravedad **1** es la más urgente y la **5** la menos urgente. Si dos pacientes tienen la misma gravedad, pasa primero quien llegó antes. Cada turno que un paciente sigue en cola añade cinco minutos de espera. Un paciente crítico pasa a perdido si supera seis turnos en cola. El tratamiento requiere **6 − gravedad** acciones `T`.
 
+## Del inicio de la jornada al alta
+
+1. `main()` crea un `Hospital`. Su constructor genera tres pacientes en espera. Cada uno recibe una cédula consecutiva desde 1001, una combinación aleatoria de nombre y apellido y un nivel de gravedad. En este punto las diez camas están vacías.
+2. `ejecutar()` presenta el menú. Al iniciar una jornada, `jugarJornada()` recupera o crea el médico por nombre, lo ubica en la primera cama y pone a cero sus contadores de esa jornada.
+3. `recibir()` toma al primero de la cola y lo asigna a la cama actual. La tabla por cédula conserva un puntero al mismo paciente. Por eso una consulta refleja los cambios posteriores de estado.
+4. Cada tratamiento reduce en uno el contador de la cama. Al completar el último, el paciente queda listo para el alta. La acción `X` registra al médico, agrega al paciente a la pila y pone la cama en mantenimiento.
+5. Al cambiar de médico se reinician la posición, los turnos, los contadores de jornada y la pila de altas. Las camas, la cola, los pacientes registrados y las estadísticas globales continúan en memoria hasta cerrar el programa.
+
+### Cuándo avanza el reloj
+
+Los movimientos, las recepciones, los tratamientos y las altas consumen un turno cuando se realizan con éxito. Un intento de moverse a la izquierda desde la primera cama o de dar un alta prematura deja el reloj en el mismo turno. Consultar la pila con `U` consume un turno incluso si está vacía. Consultar con `C` consume un turno al proporcionar una cédula, aunque la búsqueda no encuentre coincidencias. Las opciones del menú principal se ejecutan fuera de la jornada.
+
+Al avanzar el reloj, el hospital incrementa el turno, actualiza la espera de quienes siguen en cola, revisa el riesgo de los críticos y actualiza la limpieza de las camas. Al final puede llegar otro paciente. Una cama liberada inicia un contador de dos avances de limpieza; el avance correspondiente al alta ya cuenta como el primero.
+
+| Gravedad | Clasificación del simulador | Acciones de tratamiento |
+|---|---|---|
+| 1 | Crítico | 5 |
+| 2 | Severo | 4 |
+| 3 | Moderado | 3 |
+| 4 | Leve | 2 |
+| 5 | Consulta | 1 |
+
 ## Cómo está organizado el código
 
 | Archivo | Responsabilidad |
@@ -75,3 +97,25 @@ La gravedad **1** es la más urgente y la **5** la menos urgente. Si dos pacient
 6. Usa **E** y después **5**. Comprueba que el total de recibidos y de altas es **1** en esta ejecución.
 
 En las etiquetas de la sala, **V** indica cama vacía, **L** indica limpieza, **P1** a **P5** muestran la gravedad del paciente, **\*** señala un paciente crítico y **+** indica tratamiento completo.
+
+## Cómo interpretar los reportes
+
+| Vista | Información que muestra |
+|---|---|
+| Reporte de jornada | Recepciones, altas, pérdidas y turnos usados por el médico en esa jornada. |
+| Jornadas por médico | Cantidad de jornadas y turnos trabajados en cada una. La búsqueda usa el nombre con el que se registró. |
+| Auditoría | Recorre el registro histórico, identifica los pacientes en estado perdido y agrupa el total por médico a cargo. |
+| Métricas finales | Total de recepciones, altas y pérdidas, promedio de espera de los recibidos, camas desocupadas y cantidad de médicos registrados. |
+
+El promedio se calcula dividiendo los minutos acumulados hasta la recepción entre el número de pacientes recibidos. Si todavía no hubo recepciones, se muestra cero. El indicador de camas desocupadas cuenta las camas sin paciente, incluidas las que siguen en limpieza. Para recibir a alguien con `R`, la cama debe haber vuelto al estado vacío.
+
+## Comprobaciones adicionales
+
+- **Límite de movimiento.** Desde la cama 1, ingresar `A`. Se debe conservar la posición y el turno.
+- **Empate en triage.** Si dos pacientes tienen la misma gravedad, revisar `Hospital::insertarEnCola()`. Su comparación `<=` coloca al recién llegado detrás de quienes ya esperaban con esa gravedad.
+- **Cambio de médico.** Tras dar un alta, anotar la cédula con `U` y cambiar de médico con `O`. La nueva jornada debe comenzar en la cama 1 con la pila vacía. La ficha del paciente anterior debe seguir disponible con `C`.
+- **Riesgo crítico.** Si hay un paciente de gravedad 1 en cola, dejarlo esperar siete avances desde su llegada. Debe quedar registrado como perdido. Al finalizar la jornada, la opción 3 permite verificar el médico a cargo.
+
+## Archivos para compilar
+
+`Urgencias.sln` y `Urgencias/Urgencias.vcxproj` describen la solución y el proyecto para Visual Studio. En VS Code, `.vscode/tasks.json` llama al script de compilación y `.vscode/launch.json` inicia el ejecutable. Los archivos generados, como `.obj`, `.pdb` y `.exe`, se vuelven a crear al compilar.
